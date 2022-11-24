@@ -6,7 +6,6 @@ from dino_runner.components.obstacles.obstacle_manager import ObstacleManager
 
 FONT_STYLE = "freesansbold.ttf"
 
-
 class Game:
     def __init__(self):
         pygame.init()
@@ -36,6 +35,7 @@ class Game:
     def run(self): # Game loop: events - update - draw
         self.playing = True
         self.obstacle_manager.reset_obstacles()
+        self.score = 0
         while self.playing:
             self.events()
             self.update()
@@ -56,7 +56,7 @@ class Game:
     def update_score(self):
         self.score += 1
         if self.score % 100 == 0:
-            self.game_speed += 5
+            self.game_speed += 2
 
     def draw(self):
         self.clock.tick(FPS)
@@ -81,11 +81,7 @@ class Game:
         self.x_pos_bg -= self.game_speed
 
     def draw_score(self):
-        font = pygame.font.Font(FONT_STYLE, 22)
-        text = font.render(f"Score: {self.score}", True, (0, 0, 0))
-        text_rect = text.get_rect()
-        text_rect.center = (1000, 50)
-        self.screen.blit(text, text_rect)
+        self.draw_txt(f"SCORE: {self.score}", screen_width = 1000, screen_height = 50)
 
     def handle_events_on_menu(self):
         for event in pygame.event.get():
@@ -95,23 +91,30 @@ class Game:
             elif event.type == pygame.KEYDOWN: #IT'S DIFFERENT OF K_DOWN.  K_DOWN = PgDn. KEYDOWN = Any pressioned key
                 self.run()
 
+    def draw_txt(self, message, screen_width, screen_height):
+        font = pygame.font.Font(FONT_STYLE, 22)
+        text = font.render(message, True, (0,0,0))
+        text_rect = text.get_rect()
+        text_rect.center = (screen_width, screen_height)
+        self.screen.blit(text, text_rect)
+
     def show_menu(self):
         self.screen.fill((225, 255, 255))
         half_screen_height = SCREEN_HEIGHT // 2
         half_screen_width = SCREEN_WIDTH // 2
 
         if self.death_count == 0:
-            font = pygame.font.Font(FONT_STYLE, 22)
-            text = font.render("Press any key to start", True, (0, 0, 0))
-            text_rect = text.get_rect()
-            text_rect.center = (half_screen_width, half_screen_height)
-            self.screen.blit(text, text_rect)
-        else:
-            ##Create a restart menu - "Press any key to restart"
-            ##Show hit score and death_count
-            ##When restart, reset game_speed and score
-            ##Create a reusable method to draw the texts
-            self.screen.blit(ICON, (half_screen_width - 20, half_screen_height - 140))
+            self.draw_txt("Let's Gooo! Press any key to Start!", half_screen_width - 30, half_screen_height - 50)
+
+        elif self.death_count > 0:
+            self.game_speed = 20
+            self.screen.blit(ICON, (half_screen_width - 60, half_screen_height - 200))
+            self.draw_txt(f"Ooops! You Already Died: {self.death_count} Time(s)!", half_screen_width - 30, half_screen_height - 50)
+            self.draw_txt(f"Your Final Score: {self.score}", half_screen_width - 50, half_screen_height - 10 )
+            self.draw_txt("Do you wanna play again? Press any key to Restart!", half_screen_width - 40, half_screen_height + 50)
+
+            
+
 
         pygame.display.update()
         self.handle_events_on_menu()
