@@ -1,16 +1,18 @@
 import pygame
+import time
 from pygame.sprite import Sprite
+from pygame import mixer 
 
-from dino_runner.utils.constants import RUNNING, JUMPING, DUCKING, DEFAULT_TYPE, SHIELD_TYPE, DUCKING_SHIELD, JUMPING_SHIELD, RUNNING_SHIELD
+from dino_runner.utils.constants import RUNNING, JUMPING, DUCKING, DEFAULT_TYPE, SHIELD_TYPE, DUCKING_SHIELD, JUMPING_SHIELD, RUNNING_SHIELD, HAMMER_TYPE, DUCKING_HAMMER, JUMPING_HAMMER, RUNNING_HAMMER, INVISIBLE_TYPE, DUCKING_INVISIBLE, JUMPING_INVISIBLE, RUNNING_INVISIBLE
 
 X_POS = 80
 Y_POS = 310
 Y_POS_DUCK = 360
 JUMP_VEL = 8.5
 
-DUCK_IMG = {DEFAULT_TYPE: DUCKING, SHIELD_TYPE: DUCKING_SHIELD}
-JUMP_IMG = {DEFAULT_TYPE: JUMPING, SHIELD_TYPE: JUMPING_SHIELD}
-RUN_IMG =  {DEFAULT_TYPE: RUNNING, SHIELD_TYPE: RUNNING_SHIELD}
+DUCK_IMG = {DEFAULT_TYPE: DUCKING, SHIELD_TYPE: DUCKING_SHIELD, HAMMER_TYPE: DUCKING_HAMMER, INVISIBLE_TYPE: DUCKING_INVISIBLE}
+JUMP_IMG = {DEFAULT_TYPE: JUMPING, SHIELD_TYPE: JUMPING_SHIELD, HAMMER_TYPE: JUMPING_HAMMER, INVISIBLE_TYPE: JUMPING_INVISIBLE}
+RUN_IMG =  {DEFAULT_TYPE: RUNNING, SHIELD_TYPE: RUNNING_SHIELD, HAMMER_TYPE: RUNNING_HAMMER, INVISIBLE_TYPE: RUNNING_INVISIBLE}
 
 
 class Dinosaur(Sprite):
@@ -29,9 +31,9 @@ class Dinosaur(Sprite):
 
     def setup_state(self):
         self.has_power_up = False
-        self.shield = False
+        self.every_powers = False
         self.show_text = False
-        self.shield_time_up = 0
+        self.every_powers_time_up = 0
 
     def update(self, user_input):
         if self.dino_run:
@@ -41,17 +43,16 @@ class Dinosaur(Sprite):
         elif self.dino_duck:
             self.duck()
        
-        if user_input[pygame.K_UP] or user_input [pygame.K_w] or user_input[pygame.K_SPACE] and not self.dino_jump: #Make the Dino Jump(JUMPING)
+        if (user_input[pygame.K_UP] or user_input [pygame.K_w] or user_input[pygame.K_SPACE]) and not self.dino_jump: #Make the Dino Jump(JUMPING)
             self.dino_run = False
             self.dino_jump = True
-            self.dino_duck = False 
-       
-        elif user_input[pygame.K_DOWN] or user_input[pygame.K_s] and not self.dino_jump: #Make the Dino Duck(DUCKING)
+
+
+        elif user_input[pygame.K_DOWN] or user_input[pygame.K_s] and not self.dino_duck: #Make the Dino Duck(DUCKING)
             self.dino_run = False
-            self.dino_jump = False
             self.dino_duck = True
-            
-        elif not self.dino_jump and not self.dino_duck:
+           
+        if not self.dino_jump and not self.dino_duck:
            self.dino_run = True
            self.dino_jump = False
            self.dino_duck = False

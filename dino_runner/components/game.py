@@ -1,11 +1,13 @@
 import pygame
+from pygame import font
 
-from dino_runner.utils.constants import BG, ICON, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE, FPS, DEFAULT_TYPE
+from dino_runner.utils.constants import BG, ICON, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE, FPS, DEFAULT_TYPE, SCREEN, START, GAME_OVER, RESTART, TITLE, START_TITLE
 from dino_runner.components.dinosaur import Dinosaur
 from dino_runner.components.obstacles.obstacle_manager import ObstacleManager
 from dino_runner.components.power_ups.power_up_manager import PowerUpManager
+from dino_runner.components.clouds import Clouds
 
-FONT_STYLE = "freesansbold.ttf"
+FONT_STYLE = "dino_runner/assets/Fonts/04B_30_.TTF"
 
 
 class Game:
@@ -19,13 +21,14 @@ class Game:
         self.running = False
         self.game_speed = 20
         self.score = 0
-        self.high_score = 0
+        self.higher_score = 0
         self.death_count = 0
         self.x_pos_bg = 0
         self.y_pos_bg = 380
         self.player = Dinosaur()
         self.obstacle_manager = ObstacleManager()
         self.power_up_manager = PowerUpManager()
+        self.cloud = Clouds()
 
     def execute(self):
         self.running = True
@@ -41,6 +44,10 @@ class Game:
         self.obstacle_manager.reset_obstacles()
         self.power_up_manager.reset_power_ups()
         self.score = 0
+        self.dino_run = pygame.mixer.music
+        self.dino_run.load("dino_runner/assets/Sounds/Running.wav")
+        self.dino_run.play()
+
         while self.playing:
             self.events()
             self.update()
@@ -66,7 +73,7 @@ class Game:
 
     def draw(self):
         self.clock.tick(FPS)
-        self.screen.fill((255, 255, 255))
+        self.screen.fill((255, 225, 235))
         self.draw_background()
         self.player.draw(self.screen)
         self.obstacle_manager.draw(self.screen)
@@ -86,16 +93,18 @@ class Game:
             self.x_pos_bg = 0
 
         self.x_pos_bg -= self.game_speed
+        self.cloud.draw(SCREEN)
+        self.cloud.update()
 
     def draw_score(self):
-        self.draw_txt(f"SCORE: {self.score}", screen_width = 1000, screen_height = 50)
-        self.draw_txt(f"HIGH SCORE: {self.high_score} ", screen_width = 840, screen_height = 50)
+        self.draw_txt(f"Score: {self.score}", screen_width = 1000, screen_height = 50)
+        self.draw_txt(f"Higher Score: {self.higher_score} ", screen_width = 700, screen_height = 50)
 
     def draw_power_up_time(self):
         if self.player.has_power_up:
             time_to_show = round((self.player.power_up_time - pygame.time.get_ticks()) / 1000, 2)
             if time_to_show >= 0:
-                self.draw_txt(f"{self.player.type.capitalize()}, enabled for {time_to_show} seconds", screen_width = 500, screen_height = 40)
+                self.draw_txt(f"Yeah! {self.player.type.capitalize()}, enabled for {time_to_show} seconds, Go, Go!", screen_width = 500, screen_height = 250)
             else:
                 self.player.has_power_up = False
                 self.player.type = DEFAULT_TYPE
@@ -110,25 +119,33 @@ class Game:
 
     def draw_txt(self, message, screen_width, screen_height):
         font = pygame.font.Font(FONT_STYLE, 22)
-        text = font.render(message, True, (0,0,0))
+        text = font.render(message, True, (243,0,113))
         text_rect = text.get_rect()
         text_rect.center = (screen_width, screen_height)
         self.screen.blit(text, text_rect)
 
     def show_menu(self):
-        self.screen.fill((225, 255, 255))
+        self.screen.fill((255, 225, 235))
         half_screen_height = SCREEN_HEIGHT // 2
         half_screen_width = SCREEN_WIDTH // 2
 
+        if self.score > self.higher_score:
+            self.higher_score = self.score
+
         if self.death_count == 0:
+            self.screen.blit(START, (half_screen_width - 80, half_screen_height - 10))
+            self.screen.blit(START_TITLE, (half_screen_width -370, half_screen_height - 200))
             self.draw_txt("Let's Gooo! Press any key to Start!", half_screen_width - 30, half_screen_height - 50)
 
         elif self.death_count > 0:
             self.game_speed = 20
-            self.screen.blit(ICON, (half_screen_width - 60, half_screen_height - 200))
+            self.screen.blit(ICON, (half_screen_width - 90, half_screen_height - 200))
+            self.screen.blit(GAME_OVER, (half_screen_width  - 200, half_screen_height - 250))
+            self.screen.blit(RESTART, (half_screen_width + 290, half_screen_height + 30))
             self.draw_txt(f"Ooops! You Already Died: {self.death_count} Time(s)!", half_screen_width - 30, half_screen_height - 50)
             self.draw_txt(f"Your Final Score: {self.score}", half_screen_width - 50, half_screen_height - 10 )
-            self.draw_txt("Do you wanna play again? Press any key to Restart!", half_screen_width - 40, half_screen_height + 50)
+            self.draw_txt(f"Your Higher Score: {self.higher_score}", half_screen_width - 50, half_screen_height + 20 )
+            self.draw_txt("Do you wanna play again? Press any key to     !", half_screen_width - 40, half_screen_height + 65)
 
             
 
