@@ -46,7 +46,7 @@ class Game:
         self.score = 0
         self.dino_run = pygame.mixer.music
         self.dino_run.load("dino_runner/assets/Sounds/Running.wav")
-        self.dino_run.play()
+        self.dino_run.play(- 1)
 
         while self.playing:
             self.events()

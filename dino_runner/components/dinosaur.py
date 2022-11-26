@@ -47,7 +47,6 @@ class Dinosaur(Sprite):
             self.dino_run = False
             self.dino_jump = True
 
-
         elif user_input[pygame.K_DOWN] or user_input[pygame.K_s] and not self.dino_duck: #Make the Dino Duck(DUCKING)
             self.dino_run = False
             self.dino_duck = True
@@ -72,7 +71,7 @@ class Dinosaur(Sprite):
         if self.dino_jump:
             self.dino_rect.y -= self.jump_vel * 4
             self.jump_vel -= 0.8
-
+            
         if self.jump_vel < -JUMP_VEL:
             self.dino_rect.y = Y_POS
             self.dino_jump = False
